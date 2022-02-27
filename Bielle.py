@@ -26,7 +26,7 @@ def position_piston ()
 theta = np.arange(-180, 180, 60)
 td = 40
 tcomb = 100
-Qtot = 300
+Qtot = 200
 
 print(chaleur_de_combustion(Qtot, theta, td, tcomb))
 
