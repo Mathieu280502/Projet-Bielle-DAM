@@ -26,7 +26,7 @@ def volume_et_derivee (R, D, L, tau, theta):
     
     root = np.sqrt(beta**2 - sin_o**2)
     
-    V = (1 - cos_o + beta + root) * Vc / 2 + Vc / (tau -1)
+    V = (1 - cos_o + beta - root) * Vc / 2 + Vc / (tau -1)
     
     dV = (sin_o + sin_o * cos_o / root) * Vc / 2
     
