@@ -2,33 +2,37 @@ import numpy as np
 
 
 tau = 20 #[-]  #Diesel https://stringfixer.com/fr/Compression_Ratio
-"""D = @valeur alesage@ #[m]
-C = @valeur course@ #[m]
-L = @valeur longueur bielle@ #[m]
-mpiston = @valeur masse piston@ #[kg]
-mbielle = @valeur masse bielle@ #[kg]
-Q = @valeur chaleur emise par fuel par kg de melange admis@ #[J/kg_inlet gas]
-"""
-print(f"tau = {tau}")
+D = 0.040 #[m]
+#C = @valeur course@ #[m]
+L = 0.1 #[m]
+#mpiston = @valeur masse piston@ #[kg]
+#mbielle = @valeur masse bielle@ #[kg] 
+#Q = @valeur chaleur emise par fuel par kg de melange admis@ #[J/kg_inlet gas]
 
-def chaleur_de_combustion (Qtot, theta, td, Dtcomb):
-    
-    ##  Mise en radian (np.cos fonctionne avec des radians)
-    theta = theta * (np.pi / 180)
-    td = td * (np.pi / 180)
-    Dtcomb = Dtcomb * (np.pi / 180)
-    
-    
-    Q = Qtot/2 * (1 - np.cos(np.pi * (theta - td)/ Dtcomb))
-    return Q
+R = 0.02
 
-def position_piston ()
-theta = np.arange(-180, 180, 60)
-td = 40
-tcomb = 300
-Qtot = 200
 
-print(chaleur_de_combustion(Qtot, theta, td, tcomb))
+
+theta = np.arange(-180, 181, 1)  #initialisation en degré
+theta =  theta * (np.pi / 180)         #remise en gradient 
+
+def volume_et_derivee (R, D, L, tau, theta): 
+    
+    Vc = np.pi * D * D * R / 2
+    beta = L / R
+    
+    sin_o = np.sin(theta)
+    cos_o = np.cos(theta)
+    
+    root = np.sqrt(beta**2 - sin_o**2)
+    
+    V = (1 - cos_o + beta + root) * Vc / 2 + Vc / (tau -1)
+    
+    dV = (sin_o + sin_o * cos_o / root) * Vc / 2
+    
+    return (V, dV)
+
+V , dV = volume_et_derivee (R, D, L, tau, theta) 
 
 
 
