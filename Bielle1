@@ -1,0 +1,75 @@
+import numpy as np 
+import matplotlib 
+from matplotlib import pyplot 
+from scipy.integrate import solve_ivp
+
+tau = 20 #[-]  #Diesel https://stringfixer.com/fr/Compression_Ratio
+D = 0.040 #[m]
+#C = @valeur course@ #[m]
+L = 0.1 #[m]
+#mpiston = @valeur masse piston@ #[kg]
+#mbielle = @valeur masse bielle@ #[kg] 
+#Q = @valeur chaleur emise par fuel par kg de melange admis@ #[J/kg_inlet gas]
+
+R = 0.02
+Q = 218
+
+
+theta = np.arange(-180, 181, 1)  #initialisation en degré
+theta =  theta * (np.pi / 180)         #remise en gradient 
+
+
+def myfunc(rpm, s, theta, thetaC, deltaThetaC): #Elisa
+    
+    #Calcul de Q_output 
+    
+    p0 = s * 10** 5
+    
+    m = 0.5 #Masse du gaz admis par ex -> A CALCULER !!
+    Q_tot = Q*m #Chaleur de combustion pour un moteur essence de masse m
+    
+    Q_output = 0.5*Q_tot*(1-np.cos(np.pi*((theta-thetaC)/deltaThetaC)))   #dQ = 0.5*Q_tot*np.sin(np.pi*((theta-thetaC)/deltaThetaC))*(np.pi/deltaThetaC)
+    
+    #Calcul de V_output
+    
+    Vc = np.pi*D*D*R/2
+    beta = L/R
+    Vmin = Vc/(tau - 1)
+    root = np.sqrt(beta**2 - np.sin(theta)**2)
+
+    V_output = (Vc/2)*(1 - np.cos(theta) + beta - root) + Vmin    #dV = (Vc/2)*(np.sin(theta) + np.sin(theta)*np.cos(theta)/root)
+                
+    #Calcul de p_output
+    
+    p_output = pression(theta, p0, Vc, beta, Vmin, Q_tot, thetaC, deltaThetaC) 
+    
+    
+    return #(V_output, Q_output, F_pied_output, F_tete_output, p_output, t)  ;
+
+
+def pression (theta, p0, Vc, beta, Vmin, Q_tot, thetaC,deltaThetaC):
+    
+    gamma = 1.3
+    
+    def dpdt (o, p) : 
+         root = np.sqrt(beta**2 - np.sin(o)**2)
+         V = (Vc/2)*(1 - np.cos(o) + beta - root) + Vmin
+         dV = (Vc/2)*(np.sin(o) + np.sin(o)*np.cos(o)/root)
+         dQ = 0.5*Q_tot*np.sin(np.pi*((o-thetaC)/deltaThetaC))*(np.pi/deltaThetaC)
+         
+         return (-gamma*dV* p + (gamma-1) * dQ ) / V
+     
+    sol = solve_ivp(dpdt, t_span = (theta[0], max(theta)), y0 = [p0], t_eval = theta)
+     
+    return sol.y[0]
+ 
+
+p = pression (theta, 100000, 1, 3, 3, 2390, np.pi,np.pi/4) * 10**-5
+         
+
+pyplot.plot(theta, p)
+pyplot.show()
+
+
+
+
